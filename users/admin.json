@@ -1,1 +1,60 @@
-{}
+{
+  "2025-09-11": {
+    "income": 1500.0,
+    "expenses": 0.0,
+    "entries": [
+      [
+        "Yuan",
+        1000.0
+      ],
+      [
+        "Tan",
+        500.0
+      ]
+    ],
+    "expense_entries": []
+  },
+  "2025-09-12": {
+    "income": 1000.0,
+    "expenses": 0.0,
+    "entries": [
+      [
+        "Yuan",
+        1000.0
+      ]
+    ],
+    "expense_entries": []
+  },
+  "2025-09-13": {
+    "income": 1000.0,
+    "expenses": 50.0,
+    "entries": [
+      [
+        "Yuan Hessed Vasig",
+        1000.0
+      ]
+    ],
+    "expense_entries": [
+      [
+        "Food",
+        50.0
+      ]
+    ]
+  },
+  "2025-09-14": {
+    "income": 2000.0,
+    "expenses": 100.0,
+    "entries": [
+      [
+        "Yuan",
+        2000.0
+      ]
+    ],
+    "expense_entries": [
+      [
+        "Food",
+        100.0
+      ]
+    ]
+  }
+}
