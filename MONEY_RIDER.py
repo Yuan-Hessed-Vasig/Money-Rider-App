@@ -58,7 +58,7 @@ def create_modern_button(parent, text, command=None, style='primary', width=None
     
     # Mobile-friendly button sizing
     button_height = 1 if height is None else height
-    button_width = 15 if width is None else width
+    button_width = 12 if width is None else width
     
     button = tk.Button(
         parent,
@@ -119,6 +119,56 @@ def create_modern_frame(parent, bg=None):
         bd=0
     )
     return frame
+
+def create_scrollable_frame(parent, bg=None):
+    """Create a scrollable frame with modern styling and proper scrollbar positioning"""
+    if bg is None:
+        bg = MODERN_COLORS['light']
+    
+    # Create main frame
+    main_frame = tk.Frame(parent, bg=bg)
+    
+    # Create canvas for scrolling
+    canvas = tk.Canvas(main_frame, bg=bg, highlightthickness=0, 
+                      relief='flat', bd=0)
+    
+    # Create modern styled scrollbar
+    scrollbar = tk.Scrollbar(main_frame, orient="vertical", command=canvas.yview,
+                           bg=MODERN_COLORS['light'], 
+                           activebackground=MODERN_COLORS['primary'],
+                           troughcolor=MODERN_COLORS['border'],
+                           highlightthickness=0,
+                           relief='flat',
+                           bd=0,
+                           width=12)  # Slightly wider for mobile touch
+    
+    scrollable_frame = tk.Frame(canvas, bg=bg)
+    
+    # Configure scrolling
+    scrollable_frame.bind(
+        "<Configure>",
+        lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+    )
+    
+    canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+    canvas.configure(yscrollcommand=scrollbar.set)
+    
+    # Pack canvas and scrollbar with minimal padding
+    canvas.pack(side="left", fill="both", expand=True, padx=(0, 0))
+    scrollbar.pack(side="right", fill="y", padx=(0, 0))
+    
+    # Bind mousewheel to canvas
+    def _on_mousewheel(event):
+        canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+    
+    canvas.bind_all("<MouseWheel>", _on_mousewheel)
+    
+    # Store references for cleanup
+    main_frame.canvas = canvas
+    main_frame.scrollable_frame = scrollable_frame
+    main_frame.scrollbar = scrollbar
+    
+    return main_frame
 
 # --- Storage files/folders ---
 ACCOUNTS_FILE = "accounts.json"
@@ -237,15 +287,15 @@ def splash_screen():
     
     splash = tk.Tk()
     splash.title("Money Rider - Financial Tracker")
-    splash.geometry("400x700")  # Mobile-like aspect ratio
+    splash.geometry("450x800")  # Mobile-like aspect ratio
     splash.configure(bg=MODERN_COLORS['light'])
     splash.resizable(False, False)
 
     # Center the window
     splash.update_idletasks()
-    x = (splash.winfo_screenwidth() // 2) - (400 // 2)
-    y = (splash.winfo_screenheight() // 2) - (700 // 2)
-    splash.geometry(f"400x700+{x}+{y}")
+    x = (splash.winfo_screenwidth() // 2) - (450 // 2)
+    y = (splash.winfo_screenheight() // 2) - (800 // 2)
+    splash.geometry(f"450x800+{x}+{y}")
 
     # Main container with mobile-like padding
     main_container = create_modern_frame(splash, MODERN_COLORS['light'])
@@ -279,7 +329,7 @@ def splash_screen():
                        fg=MODERN_COLORS['dark'])
     subtitle.pack(pady=8)
 
-    # Button container with mobile spacing
+    # Button container with mobile spacings
     button_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
     button_frame.pack(pady=40)
 
@@ -314,15 +364,15 @@ def create_account_screen():
     
     create = tk.Tk()
     create.title("Create Account - Money Rider")
-    create.geometry("400x700")  # Mobile aspect ratio
+    create.geometry("450x800")  # Mobile aspect ratio
     create.configure(bg=MODERN_COLORS['light'])
     create.resizable(False, False)
 
     # Center the window
     create.update_idletasks()
-    x = (create.winfo_screenwidth() // 2) - (400 // 2)
-    y = (create.winfo_screenheight() // 2) - (700 // 2)
-    create.geometry(f"400x700+{x}+{y}")
+    x = (create.winfo_screenwidth() // 2) - (450 // 2)
+    y = (create.winfo_screenheight() // 2) - (800 // 2)
+    create.geometry(f"450x800+{x}+{y}")
 
     # Main container with mobile padding
     main_container = create_modern_frame(create, MODERN_COLORS['light'])
@@ -422,15 +472,15 @@ def login_screen():
     
     login = tk.Tk()
     login.title("Sign In - Money Rider")
-    login.geometry("400x700")  # Mobile aspect ratio
+    login.geometry("450x800")  # Mobile aspect ratio
     login.configure(bg=MODERN_COLORS['light'])
     login.resizable(False, False)
 
     # Center the window
     login.update_idletasks()
-    x = (login.winfo_screenwidth() // 2) - (400 // 2)
-    y = (login.winfo_screenheight() // 2) - (700 // 2)
-    login.geometry(f"400x700+{x}+{y}")
+    x = (login.winfo_screenwidth() // 2) - (450 // 2)
+    y = (login.winfo_screenheight() // 2) - (800 // 2)
+    login.geometry(f"450x800+{x}+{y}")
 
     # Main container with mobile padding
     main_container = create_modern_frame(login, MODERN_COLORS['light'])
@@ -531,15 +581,15 @@ def calendar_screen():
     
     cal = tk.Tk()
     cal.title("Money Rider - Calendar")
-    cal.geometry("450x900")  # Mobile-like aspect ratio with more height
+    cal.geometry("450x800")  # Mobile-like aspect ratio with more height
     cal.configure(bg=MODERN_COLORS['light'])
     cal.resizable(False, False)
 
     # Center the window
     cal.update_idletasks()
     x = (cal.winfo_screenwidth() // 2) - (450 // 2)
-    y = (cal.winfo_screenheight() // 2) - (900 // 2)
-    cal.geometry(f"450x900+{x}+{y}")
+    y = (cal.winfo_screenheight() // 2) - (800 // 2)
+    cal.geometry(f"450x800+{x}+{y}")
 
     current_date = datetime.now()
     current_year = current_date.year
@@ -558,7 +608,7 @@ def calendar_screen():
 
         # Main frame
         main_frame = tk.Frame(popup, bg="#1C1C1C")
-        main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
         # Title
         tk.Label(main_frame, text=f"Saved Financial Data", bg="#1C1C1C", fg="white",
@@ -677,12 +727,15 @@ def calendar_screen():
         for widget in cal.winfo_children():
             widget.destroy()
 
-        # Main container
-        cal_frame = create_modern_frame(cal, MODERN_COLORS['light'])
-        cal_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+        # Main container with scrolling
+        cal_frame = create_scrollable_frame(cal, MODERN_COLORS['light'])
+        cal_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Get the scrollable frame for adding widgets
+        scrollable_content = cal_frame.scrollable_frame
 
         # Header with title and controls
-        header_frame = create_modern_frame(cal_frame, MODERN_COLORS['light'])
+        header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
         header_frame.pack(fill=tk.X, pady=(0, 20))
 
         # Title
@@ -718,13 +771,13 @@ def calendar_screen():
         year_menu.bind("<<ComboboxSelected>>", lambda e: change_year())
 
         # Calendar container
-        calendar_container = create_modern_frame(cal_frame, MODERN_COLORS['white'])
-        calendar_container.pack(fill=tk.BOTH, expand=True, pady=10)
+        calendar_container = create_modern_frame(scrollable_content, MODERN_COLORS['white'])
+        calendar_container.pack(fill=tk.BOTH, expand=True, pady=10, padx=5)
         calendar_container.configure(relief='solid', bd=1)
 
         # Days of week header
         days_frame = create_modern_frame(calendar_container, MODERN_COLORS['light'])
-        days_frame.pack(fill=tk.X, padx=10, pady=10)
+        days_frame.pack(fill=tk.X, padx=5, pady=10)
 
         days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         for col, day in enumerate(days_of_week):
@@ -740,7 +793,7 @@ def calendar_screen():
 
         # Calendar days grid
         days_grid_frame = create_modern_frame(calendar_container, MODERN_COLORS['white'])
-        days_grid_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+        days_grid_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=(0, 10))
         
         month_cal = calendar.monthcalendar(current_year, current_month)
         for row, week in enumerate(month_cal):
@@ -803,8 +856,8 @@ def calendar_screen():
             days_grid_frame.grid_rowconfigure(i, weight=1)
 
         # Date range calculation section
-        range_container = create_modern_frame(cal_frame, MODERN_COLORS['light'])
-        range_container.pack(fill=tk.X, pady=15)
+        range_container = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
+        range_container.pack(fill=tk.X, pady=15, padx=5)
 
         range_title = tk.Label(range_container, text="Date Range Calculator", 
                               font=MODERN_FONTS['subheading'], 
@@ -817,52 +870,54 @@ def calendar_screen():
         range_frame.pack(fill=tk.X, pady=10)
         range_frame.configure(relief='solid', bd=1)
 
-        # Start date row
-        start_frame = create_modern_frame(range_frame, MODERN_COLORS['white'])
-        start_frame.pack(fill=tk.X, padx=15, pady=10)
+        # Date input frame using grid for better width utilization
+        date_input_frame = create_modern_frame(range_frame, MODERN_COLORS['white'])
+        date_input_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        # Configure grid weights for better distribution
+        for i in range(4):
+            date_input_frame.grid_columnconfigure(i, weight=1)
 
-        tk.Label(start_frame, text="From:", 
+        # Start date row
+        tk.Label(date_input_frame, text="From:", 
                 font=MODERN_FONTS['body'], 
                 bg=MODERN_COLORS['white'], 
-                fg=MODERN_COLORS['dark']).grid(row=0, column=0, sticky="w", padx=(0, 10))
+                fg=MODERN_COLORS['dark']).grid(row=0, column=0, sticky="w", padx=(0, 5), pady=5)
 
-        start_day = ttk.Combobox(start_frame, values=list(range(1, 32)), width=3,
+        start_day = ttk.Combobox(date_input_frame, values=list(range(1, 32)), width=4,
                                  font=MODERN_FONTS['body'], state="readonly")
-        start_day.grid(row=0, column=1, sticky="w", padx=2)
+        start_day.grid(row=0, column=1, sticky="ew", padx=2, pady=5)
         start_day.set("1")
 
-        start_month = ttk.Combobox(start_frame, values=list(calendar.month_name[1:]), width=12,
+        start_month = ttk.Combobox(date_input_frame, values=list(calendar.month_name[1:]), width=15,
                                    font=MODERN_FONTS['body'], state="readonly")
-        start_month.grid(row=0, column=2, sticky="w", padx=2)
+        start_month.grid(row=0, column=2, sticky="ew", padx=2, pady=5)
         start_month.set(calendar.month_name[current_month])
 
-        start_year = ttk.Combobox(start_frame, values=list(range(2020, 2031)), width=6,
+        start_year = ttk.Combobox(date_input_frame, values=list(range(2020, 2031)), width=8,
                                   font=MODERN_FONTS['body'], state="readonly")
-        start_year.grid(row=0, column=3, sticky="w", padx=2)
+        start_year.grid(row=0, column=3, sticky="ew", padx=2, pady=5)
         start_year.set(str(current_year))
 
         # End date row
-        end_frame = create_modern_frame(range_frame, MODERN_COLORS['white'])
-        end_frame.pack(fill=tk.X, padx=15, pady=10)
-
-        tk.Label(end_frame, text="To:", 
+        tk.Label(date_input_frame, text="To:", 
                 font=MODERN_FONTS['body'], 
                 bg=MODERN_COLORS['white'], 
-                fg=MODERN_COLORS['dark']).grid(row=0, column=0, sticky="w", padx=(0, 10))
+                fg=MODERN_COLORS['dark']).grid(row=1, column=0, sticky="w", padx=(0, 5), pady=5)
 
-        end_day = ttk.Combobox(end_frame, values=list(range(1, 32)), width=3,
+        end_day = ttk.Combobox(date_input_frame, values=list(range(1, 32)), width=4,
                                font=MODERN_FONTS['body'], state="readonly")
-        end_day.grid(row=0, column=1, sticky="w", padx=2)
+        end_day.grid(row=1, column=1, sticky="ew", padx=2, pady=5)
         end_day.set("1")
 
-        end_month = ttk.Combobox(end_frame, values=list(calendar.month_name[1:]), width=12,
+        end_month = ttk.Combobox(date_input_frame, values=list(calendar.month_name[1:]), width=15,
                                  font=MODERN_FONTS['body'], state="readonly")
-        end_month.grid(row=0, column=2, sticky="w", padx=2)
+        end_month.grid(row=1, column=2, sticky="ew", padx=2, pady=5)
         end_month.set(calendar.month_name[current_month])
 
-        end_year = ttk.Combobox(end_frame, values=list(range(2020, 2031)), width=6,
+        end_year = ttk.Combobox(date_input_frame, values=list(range(2020, 2031)), width=8,
                                 font=MODERN_FONTS['body'], state="readonly")
-        end_year.grid(row=0, column=3, sticky="w", padx=2)
+        end_year.grid(row=1, column=3, sticky="ew", padx=2, pady=5)
         end_year.set(str(current_year))
 
         def calculate_range():
@@ -974,7 +1029,7 @@ def calendar_screen():
         calc_button.pack(pady=10)
 
         # Navigation buttons - mobile style
-        nav_frame = create_modern_frame(cal_frame, MODERN_COLORS['light'])
+        nav_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
         nav_frame.pack(pady=20)
 
         # Undo button - mobile style
@@ -1013,15 +1068,15 @@ def income_screen(day, year, month):
     
     inc = tk.Tk()
     inc.title("Financial Tracking - Money Rider")
-    inc.geometry("450x900")  # Mobile aspect ratio with more height
+    inc.geometry("450x800")  # Mobile aspect ratio with more height
     inc.configure(bg=MODERN_COLORS['light'])
     inc.resizable(False, False)
 
     # Center the window
     inc.update_idletasks()
     x = (inc.winfo_screenwidth() // 2) - (450 // 2)
-    y = (inc.winfo_screenheight() // 2) - (900 // 2)
-    inc.geometry(f"450x900+{x}+{y}")
+    y = (inc.winfo_screenheight() // 2) - (800 // 2)
+    inc.geometry(f"450x800+{x}+{y}")
 
     # Floating undo button in top-right corner
     floating_undo_frame = create_modern_frame(inc, MODERN_COLORS['primary'])
@@ -1044,12 +1099,15 @@ def income_screen(day, year, month):
     # Store the current date
     current_date_str = f"{year}-{month:02d}-{day:02d}"
 
-    # Main container with mobile-like padding
-    main_container = create_modern_frame(inc, MODERN_COLORS['light'])
-    main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+    # Main container with mobile-like padding and scrolling
+    main_container = create_scrollable_frame(inc, MODERN_COLORS['light'])
+    main_container.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+    
+    # Get the scrollable frame for adding widgets
+    scrollable_content = main_container.scrollable_frame
 
     # Header section
-    header_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
+    header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
     header_frame.pack(fill=tk.X, pady=(0, 20))
 
     # Title - mobile style
@@ -1072,15 +1130,8 @@ def income_screen(day, year, month):
                                      style='warning', width=15)
     top_undo_btn.pack(pady=5)
 
-    # Help text for keyboard shortcut
-    help_text = tk.Label(header_frame, text="💡 Tip: Press Ctrl+Z to go back", 
-                        font=('Segoe UI', 10), 
-                        bg=MODERN_COLORS['light'], 
-                        fg=MODERN_COLORS['dark'])
-    help_text.pack(pady=2)
-
     # Input section with mobile-like cards
-    input_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
+    input_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
     input_frame.pack(fill=tk.X, pady=(0, 15))
     
     # Create notebook for tabs with mobile styling
@@ -1226,9 +1277,9 @@ def income_screen(day, year, month):
     add_expense_btn.pack(pady=(0, 15))
 
     # Display section with tabs
-    display_frame = create_modern_frame(main_container, MODERN_COLORS['white'])
+    display_frame = create_modern_frame(scrollable_content, MODERN_COLORS['white'])
     display_frame.pack(fill=tk.X, pady=(0, 15))
-    display_frame.configure(relief='solid', bd=1, height=250)
+    display_frame.configure(relief='solid', bd=1, height=200)
 
     # Create notebook for display tabs
     display_notebook = ttk.Notebook(display_frame)
@@ -1252,7 +1303,7 @@ def income_screen(day, year, month):
             bg=MODERN_COLORS['light'], 
             fg=MODERN_COLORS['dark']).pack(side=tk.RIGHT, padx=10)
 
-    # Create income listbox
+    # Create income listbox with double-click editing
     income_listbox = tk.Listbox(income_display_tab, 
                                font=MODERN_FONTS['body'],
                                bg=MODERN_COLORS['white'], 
@@ -1261,8 +1312,12 @@ def income_screen(day, year, month):
                                selectforeground=MODERN_COLORS['white'],
                                relief='flat',
                                bd=0,
-                               highlightthickness=0)
+                               highlightthickness=0,
+                               cursor='hand2')  # Show hand cursor to indicate clickable
     income_listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+    
+    # Bind double-click to edit income
+    income_listbox.bind('<Double-Button-1>', lambda e: edit_income_selected())
 
     # Expenses display tab
     expense_display_tab = create_modern_frame(display_notebook, MODERN_COLORS['white'])
@@ -1282,7 +1337,7 @@ def income_screen(day, year, month):
             bg=MODERN_COLORS['light'], 
             fg=MODERN_COLORS['dark']).pack(side=tk.RIGHT, padx=10)
 
-    # Create expense listbox
+    # Create expense listbox with double-click editing
     expense_listbox = tk.Listbox(expense_display_tab, 
                                 font=MODERN_FONTS['body'],
                                 bg=MODERN_COLORS['white'], 
@@ -1291,8 +1346,12 @@ def income_screen(day, year, month):
                                 selectforeground=MODERN_COLORS['white'],
                                 relief='flat',
                                 bd=0,
-                                highlightthickness=0)
+                                highlightthickness=0,
+                                cursor='hand2')  # Show hand cursor to indicate clickable
     expense_listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+    
+    # Bind double-click to edit expense
+    expense_listbox.bind('<Double-Button-1>', lambda e: edit_expense_selected())
 
     # Populate listboxes with existing data
     for entry in current_entries:
@@ -1478,30 +1537,50 @@ def income_screen(day, year, month):
                                       style='success', width=20)
         save_btn.pack(pady=10)
 
-    # Delete selected income
+    # Delete selected income with confirmation
     def delete_income_selected():
         sel = income_listbox.curselection()
         if not sel:
             messagebox.showinfo("Error", "Please select an income entry to delete")
             return
         idx = sel[0]
-        current_entries.pop(idx)
-        income_listbox.delete(idx)
-        save_data(current_date_str)
+        entry = current_entries[idx]
+        
+        # Show confirmation dialog
+        result = messagebox.askyesno("Confirm Delete", 
+                                   f"Are you sure you want to delete this income entry?\n\n"
+                                   f"Source: {entry[0]}\n"
+                                   f"Amount: ₱{entry[1]:,.2f}")
+        
+        if result:
+            current_entries.pop(idx)
+            income_listbox.delete(idx)
+            save_data(current_date_str)
+            messagebox.showinfo("Success", "Income entry deleted successfully!")
 
-    # Delete selected expense
+    # Delete selected expense with confirmation
     def delete_expense_selected():
         sel = expense_listbox.curselection()
         if not sel:
             messagebox.showinfo("Error", "Please select an expense entry to delete")
             return
         idx = sel[0]
-        current_expenses.pop(idx)
-        expense_listbox.delete(idx)
-        save_data(current_date_str)
+        expense = current_expenses[idx]
+        
+        # Show confirmation dialog
+        result = messagebox.askyesno("Confirm Delete", 
+                                   f"Are you sure you want to delete this expense entry?\n\n"
+                                   f"Category: {expense[0]}\n"
+                                   f"Amount: ₱{expense[1]:,.2f}")
+        
+        if result:
+            current_expenses.pop(idx)
+            expense_listbox.delete(idx)
+            save_data(current_date_str)
+            messagebox.showinfo("Success", "Expense entry deleted successfully!")
 
     # Mobile-style button section
-    button_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
+    button_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
     button_frame.pack(fill=tk.X, pady=10)
 
     # Undo button (bottom section) - mobile style
@@ -1519,7 +1598,13 @@ def income_screen(day, year, month):
     tk.Label(action_card, text="📊 Manage Income", 
             font=('Segoe UI', 16, 'bold'), 
             bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(pady=(15, 10))
+            fg=MODERN_COLORS['dark']).pack(pady=(15, 5))
+    
+    # Instruction label for income
+    tk.Label(action_card, text="💡 Double-click an item to edit, or use buttons below", 
+            font=('Segoe UI', 10), 
+            bg=MODERN_COLORS['white'], 
+            fg=MODERN_COLORS['dark']).pack(pady=(0, 10))
 
     income_btn_row = create_modern_frame(action_card, MODERN_COLORS['white'])
     income_btn_row.pack(fill=tk.X, padx=15, pady=(0, 10))
@@ -1538,7 +1623,13 @@ def income_screen(day, year, month):
     tk.Label(action_card, text="💸 Manage Expenses", 
             font=('Segoe UI', 16, 'bold'), 
             bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(pady=(15, 10))
+            fg=MODERN_COLORS['dark']).pack(pady=(15, 5))
+    
+    # Instruction label for expenses
+    tk.Label(action_card, text="💡 Double-click an item to edit, or use buttons below", 
+            font=('Segoe UI', 10), 
+            bg=MODERN_COLORS['white'], 
+            fg=MODERN_COLORS['dark']).pack(pady=(0, 10))
 
     expense_btn_row = create_modern_frame(action_card, MODERN_COLORS['white'])
     expense_btn_row.pack(fill=tk.X, padx=15, pady=(0, 15))
@@ -1577,15 +1668,15 @@ def expenses_screen(day, year, month):
     
     exp = tk.Tk()
     exp.title("Expense Tracking - Money Rider")
-    exp.geometry("700x800")
+    exp.geometry("450x800")
     exp.configure(bg=MODERN_COLORS['light'])
     exp.resizable(False, False)
 
     # Center the window
     exp.update_idletasks()
-    x = (exp.winfo_screenwidth() // 2) - (700 // 2)
+    x = (exp.winfo_screenwidth() // 2) - (450 // 2)
     y = (exp.winfo_screenheight() // 2) - (800 // 2)
-    exp.geometry(f"700x800+{x}+{y}")
+    exp.geometry(f"450x800+{x}+{y}")
 
     expense_var = tk.StringVar()
     amount_var = tk.StringVar()
@@ -1593,12 +1684,15 @@ def expenses_screen(day, year, month):
     # Store the current date
     current_date_str = f"{year}-{month:02d}-{day:02d}"
 
-    # Main container
-    main_container = create_modern_frame(exp, MODERN_COLORS['light'])
-    main_container.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+    # Main container with scrolling
+    main_container = create_scrollable_frame(exp, MODERN_COLORS['light'])
+    main_container.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+    
+    # Get the scrollable frame for adding widgets
+    scrollable_content = main_container.scrollable_frame
 
     # Header section
-    header_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
+    header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
     header_frame.pack(fill=tk.X, pady=(0, 30))
 
     # Title
@@ -1706,7 +1800,7 @@ def expenses_screen(day, year, month):
         save_btn.pack(pady=10)
 
     # Display section
-    display_frame = create_modern_frame(main_container, MODERN_COLORS['white'])
+    display_frame = create_modern_frame(scrollable_content, MODERN_COLORS['white'])
     display_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
     display_frame.configure(relief='solid', bd=1)
 
@@ -1723,8 +1817,17 @@ def expenses_screen(day, year, month):
             font=MODERN_FONTS['body'], 
             bg=MODERN_COLORS['light'], 
             fg=MODERN_COLORS['dark']).pack(side=tk.RIGHT, padx=10)
+    
+    # Instruction label
+    instruction_frame = create_modern_frame(display_frame, MODERN_COLORS['light'])
+    instruction_frame.pack(fill=tk.X, padx=10, pady=(0, 5))
+    
+    tk.Label(instruction_frame, text="💡 Double-click an item to edit it", 
+            font=('Segoe UI', 10), 
+            bg=MODERN_COLORS['light'], 
+            fg=MODERN_COLORS['dark']).pack()
 
-    # Create a listbox with modern styling
+    # Create a listbox with modern styling and double-click editing
     listbox = tk.Listbox(display_frame, 
                         font=MODERN_FONTS['body'],
                         bg=MODERN_COLORS['white'], 
@@ -1733,8 +1836,12 @@ def expenses_screen(day, year, month):
                         selectforeground=MODERN_COLORS['white'],
                         relief='flat',
                         bd=0,
-                        highlightthickness=0)
+                        highlightthickness=0,
+                        cursor='hand2')  # Show hand cursor to indicate clickable
     listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+    
+    # Bind double-click to edit expense
+    listbox.bind('<Double-Button-1>', lambda e: edit_selected())
 
     # Populate listbox with existing expenses
     for expense in current_expenses:
@@ -1810,19 +1917,29 @@ def expenses_screen(day, year, month):
                                        style='success', width=15)
         save_btn.pack(pady=10)
 
-    # Delete selected expense
+    # Delete selected expense with confirmation
     def delete_selected():
         sel = listbox.curselection()
         if not sel:
             messagebox.showinfo("Error", "No expense selected to delete")
             return
         idx = sel[0]
-        current_expenses.pop(idx)
-        listbox.delete(idx)
-        save_data(current_date_str)
+        expense = current_expenses[idx]
+        
+        # Show confirmation dialog
+        result = messagebox.askyesno("Confirm Delete", 
+                                   f"Are you sure you want to delete this expense entry?\n\n"
+                                   f"Category: {expense[0]}\n"
+                                   f"Amount: ₱{expense[1]:,.2f}")
+        
+        if result:
+            current_expenses.pop(idx)
+            listbox.delete(idx)
+            save_data(current_date_str)
+            messagebox.showinfo("Success", "Expense entry deleted successfully!")
 
     # Button section
-    button_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
+    button_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
     button_frame.pack(fill=tk.X, pady=20)
 
     # Action buttons
@@ -1905,12 +2022,15 @@ def total_screen(day, year, month):
     y = (total.winfo_screenheight() // 2) - (800 // 2)
     total.geometry(f"450x800+{x}+{y}")
 
-    # Main container with mobile padding
-    main_container = create_modern_frame(total, MODERN_COLORS['light'])
-    main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+    # Main container with mobile padding and scrolling
+    main_container = create_scrollable_frame(total, MODERN_COLORS['light'])
+    main_container.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+    
+    # Get the scrollable frame for adding widgets
+    scrollable_content = main_container.scrollable_frame
 
     # Header section
-    header_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
+    header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
     header_frame.pack(pady=(0, 20))
 
     # Title - mobile style
@@ -1929,7 +2049,7 @@ def total_screen(day, year, month):
     date_label.pack(pady=5)
 
     # Summary container - mobile card style
-    summary_container = create_modern_frame(main_container, MODERN_COLORS['white'])
+    summary_container = create_modern_frame(scrollable_content, MODERN_COLORS['white'])
     summary_container.pack(fill=tk.X, pady=20)
     summary_container.configure(relief='solid', bd=2)
 
@@ -1977,7 +2097,7 @@ def total_screen(day, year, month):
             fg=MODERN_COLORS['success'] if day_total >= 0 else MODERN_COLORS['danger']).pack(side=tk.RIGHT, padx=20, pady=15)
 
     # Navigation buttons - mobile style
-    button_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
+    button_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
     button_frame.pack(pady=30)
 
     # Undo button - mobile style
