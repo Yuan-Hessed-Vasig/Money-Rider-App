@@ -6,31 +6,103 @@ import calendar
 import json
 import os
 
-# Modern UI Configuration
+# Dynamic Resolution Configuration
+class ResponsiveConfig:
+    def __init__(self):
+        # Get screen dimensions
+        self.screen_width = 0
+        self.screen_height = 0
+        self.dpi_scale = 1.0
+        
+        # Initialize with a temporary window to get screen info
+        temp_root = tk.Tk()
+        temp_root.withdraw()  # Hide the window
+        self.screen_width = temp_root.winfo_screenwidth()
+        self.screen_height = temp_root.winfo_screenheight()
+        temp_root.destroy()
+        
+        # Calculate responsive dimensions
+        self.calculate_responsive_dimensions()
+        
+    def calculate_responsive_dimensions(self):
+        """Calculate responsive dimensions based on screen size"""
+        # Base mobile dimensions (iPhone-like)
+        base_width = 375
+        base_height = 812
+        
+        # Calculate scaling factors
+        width_scale = min(self.screen_width / 1920, 1.0)  # Cap at 1920px
+        height_scale = min(self.screen_height / 1080, 1.0)  # Cap at 1080px
+        
+        # Use the smaller scale to maintain aspect ratio
+        self.scale_factor = min(width_scale, height_scale, 1.0)
+        
+        # Ensure minimum scale for very small screens
+        self.scale_factor = max(self.scale_factor, 0.6)
+        
+        # Calculate responsive window dimensions
+        self.window_width = max(int(base_width * self.scale_factor), 300)
+        self.window_height = max(int(base_height * self.scale_factor), 600)
+        
+        # Calculate responsive font sizes
+        self.title_font_size = max(int(28 * self.scale_factor), 20)
+        self.heading_font_size = max(int(20 * self.scale_factor), 16)
+        self.subheading_font_size = max(int(16 * self.scale_factor), 14)
+        self.body_font_size = max(int(12 * self.scale_factor), 10)
+        self.small_font_size = max(int(10 * self.scale_factor), 8)
+        
+        # Calculate responsive padding and spacing
+        self.padding_large = max(int(20 * self.scale_factor), 15)
+        self.padding_medium = max(int(15 * self.scale_factor), 10)
+        self.padding_small = max(int(10 * self.scale_factor), 8)
+        self.padding_tiny = max(int(5 * self.scale_factor), 3)
+        
+        # Calculate responsive button dimensions
+        self.button_width = max(int(12 * self.scale_factor), 8)
+        self.button_height = max(int(1 * self.scale_factor), 1)
+        self.button_padding_x = max(int(20 * self.scale_factor), 15)
+        self.button_padding_y = max(int(15 * self.scale_factor), 10)
+        
+        # Calculate responsive entry field width
+        self.entry_width = max(int(25 * self.scale_factor), 20)
+
+# Global responsive configuration
+responsive_config = ResponsiveConfig()
+
+# Modern UI Configuration - Lush Forest Theme
 MODERN_COLORS = {
-    'primary': '#2563EB',      # Blue
-    'primary_dark': '#1D4ED8',
-    'secondary': '#7C3AED',    # Purple
-    'success': '#10B981',      # Green
-    'danger': '#EF4444',       # Red
-    'warning': '#F59E0B',      # Orange
-    'dark': '#1F2937',         # Dark gray
-    'darker': '#111827',       # Darker gray
-    'light': '#F9FAFB',        # Light gray
-    'white': '#FFFFFF',
-    'border': '#E5E7EB'
+    'primary': '#68BA7F',      # Medium Sage Green - Primary buttons and accents
+    'primary_dark': '#2E6F40', # Dark Forest Green - Hover states
+    'secondary': '#68BA7F',    # Medium Sage Green - Secondary elements
+    'success': '#68BA7F',      # Medium Sage Green - Success states
+    'danger': '#EF4444',       # Red - Keep for danger states
+    'warning': '#F59E0B',      # Orange - Keep for warnings
+    'dark': '#253D2C',         # Very Dark Green - Primary text
+    'darker': '#1A2B1F',       # Even darker green - Darkest elements
+    'light': '#CFFFDC',        # Light Mint Green - Background
+    'white': '#FFFFFF',        # Pure white - Cards and highlights
+    'border': '#68BA7F',       # Medium Sage Green - Borders
+    'surface': '#253D2C',      # Very Dark Green - Surface elements
+    'text_primary': '#FFFFFF', # White - Primary text on dark backgrounds
+    'text_secondary': '#CFFFDC', # Light Mint - Secondary text
+    'background': '#253D2C',   # Very Dark Green - Main background
+    'card': '#2E6F40',         # Dark Forest Green - Card backgrounds
+    'input_bg': '#2E6F40',     # Dark Forest Green - Input backgrounds
+    'input_border': '#68BA7F', # Medium Sage Green - Input borders
+    'accent': '#CFFFDC'        # Light Mint - Accent elements
 }
 
+# Dynamic font configuration based on screen resolution
 MODERN_FONTS = {
-    'title': ('Segoe UI', 28, 'bold'),
-    'heading': ('Segoe UI', 20, 'bold'),
-    'subheading': ('Segoe UI', 16, 'bold'),
-    'body': ('Segoe UI', 12),
-    'small': ('Segoe UI', 10)
+    'title': ('Segoe UI', responsive_config.title_font_size, 'bold'),
+    'heading': ('Segoe UI', responsive_config.heading_font_size, 'bold'),
+    'subheading': ('Segoe UI', responsive_config.subheading_font_size, 'bold'),
+    'body': ('Segoe UI', responsive_config.body_font_size),
+    'small': ('Segoe UI', responsive_config.small_font_size)
 }
 
 def create_modern_button(parent, text, command=None, style='primary', width=None, height=None):
-    """Create a mobile-friendly styled button"""
+    """Create a mobile-friendly styled button with responsive sizing"""
     if style == 'primary':
         bg = MODERN_COLORS['primary']
         hover_bg = MODERN_COLORS['primary_dark']
@@ -56,9 +128,12 @@ def create_modern_button(parent, text, command=None, style='primary', width=None
         hover_bg = '#374151'
         fg = MODERN_COLORS['white']
     
-    # Mobile-friendly button sizing
-    button_height = 1 if height is None else height
-    button_width = 12 if width is None else width
+    # Responsive button sizing
+    button_height = responsive_config.button_height if height is None else height
+    button_width = responsive_config.button_width if width is None else width
+    
+    # Responsive font size for buttons
+    button_font_size = max(int(14 * responsive_config.scale_factor), 12)
     
     button = tk.Button(
         parent,
@@ -66,14 +141,14 @@ def create_modern_button(parent, text, command=None, style='primary', width=None
         command=command,
         bg=bg,
         fg=fg,
-        font=('Segoe UI', 14, 'bold'),  # Larger font for mobile
+        font=('Segoe UI', button_font_size, 'bold'),
         relief='flat',
         bd=0,
         cursor='hand2',
         width=button_width,
         height=button_height,
-        padx=20,  # More padding for touch
-        pady=15,  # More vertical padding
+        padx=responsive_config.button_padding_x,
+        pady=responsive_config.button_padding_y,
         activebackground=hover_bg,
         activeforeground=fg
     )
@@ -90,20 +165,23 @@ def create_modern_button(parent, text, command=None, style='primary', width=None
     return button
 
 def create_modern_entry(parent, placeholder="", show=None):
-    """Create a mobile-friendly styled entry field"""
+    """Create a mobile-friendly styled entry field for dark mode with responsive sizing"""
+    # Responsive font size for entry fields
+    entry_font_size = max(int(16 * responsive_config.scale_factor), 12)
+    
     entry = tk.Entry(
         parent,
-        font=('Segoe UI', 16),  # Larger font for mobile
+        font=('Segoe UI', entry_font_size),
         relief='flat',
         bd=2,
         highlightthickness=3,
         highlightcolor=MODERN_COLORS['primary'],
-        highlightbackground=MODERN_COLORS['border'],
-        bg=MODERN_COLORS['white'],
-        fg=MODERN_COLORS['dark'],
+        highlightbackground=MODERN_COLORS['input_border'],
+        bg=MODERN_COLORS['input_bg'],
+        fg=MODERN_COLORS['text_primary'],
         insertbackground=MODERN_COLORS['primary'],
         show=show,
-        width=25  # Wider for mobile
+        width=responsive_config.entry_width
     )
     return entry
 
@@ -120,10 +198,17 @@ def create_modern_frame(parent, bg=None):
     )
     return frame
 
+def center_window(window):
+    """Center the window on screen with responsive sizing"""
+    window.update_idletasks()
+    x = (window.winfo_screenwidth() // 2) - (responsive_config.window_width // 2)
+    y = (window.winfo_screenheight() // 2) - (responsive_config.window_height // 2)
+    window.geometry(f"{responsive_config.window_width}x{responsive_config.window_height}+{x}+{y}")
+
 def create_scrollable_frame(parent, bg=None):
     """Create a scrollable frame with modern styling and proper scrollbar positioning"""
     if bg is None:
-        bg = MODERN_COLORS['light']
+        bg = MODERN_COLORS['background']
     
     # Create main frame
     main_frame = tk.Frame(parent, bg=bg)
@@ -134,7 +219,7 @@ def create_scrollable_frame(parent, bg=None):
     
     # Create modern styled scrollbar
     scrollbar = tk.Scrollbar(main_frame, orient="vertical", command=canvas.yview,
-                           bg=MODERN_COLORS['light'], 
+                           bg=MODERN_COLORS['background'], 
                            activebackground=MODERN_COLORS['primary'],
                            troughcolor=MODERN_COLORS['border'],
                            highlightthickness=0,
@@ -287,72 +372,76 @@ def splash_screen():
     
     splash = tk.Tk()
     splash.title("Money Rider - Financial Tracker")
-    splash.geometry("450x800")  # Mobile-like aspect ratio
-    splash.configure(bg=MODERN_COLORS['light'])
+    splash.configure(bg=MODERN_COLORS['background'])
     splash.resizable(False, False)
 
-    # Center the window
-    splash.update_idletasks()
-    x = (splash.winfo_screenwidth() // 2) - (450 // 2)
-    y = (splash.winfo_screenheight() // 2) - (800 // 2)
-    splash.geometry(f"450x800+{x}+{y}")
+    # Center the window with responsive sizing
+    center_window(splash)
 
-    # Main container with mobile-like padding
-    main_container = create_modern_frame(splash, MODERN_COLORS['light'])
-    main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+    # Main container with responsive padding
+    main_container = create_modern_frame(splash, MODERN_COLORS['background'])
+    main_container.pack(fill=tk.BOTH, expand=True, 
+                       padx=responsive_config.padding_large, 
+                       pady=responsive_config.padding_large)
 
     # Header section
-    header_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
-    header_frame.pack(pady=(30, 50))
+    header_frame = create_modern_frame(main_container, MODERN_COLORS['background'])
+    header_frame.pack(pady=(responsive_config.padding_medium, responsive_config.padding_large))
 
-    # App icon/logo area - mobile style
+    # App icon/logo area - responsive sizing
     icon_frame = create_modern_frame(header_frame, MODERN_COLORS['primary'])
-    icon_frame.pack(pady=20)
-    icon_frame.configure(relief='flat', bd=0, height=120, width=120)
+    icon_frame.pack(pady=responsive_config.padding_large)
+    icon_size = max(int(120 * responsive_config.scale_factor), 80)
+    icon_frame.configure(relief='flat', bd=0, height=icon_size, width=icon_size)
     
-    # Option 1: Use emoji logo (current)
-    icon_label = tk.Label(icon_frame, text="🏍️", font=('Segoe UI Emoji', 50), 
+    # Responsive emoji logo
+    emoji_font_size = max(int(50 * responsive_config.scale_factor), 30)
+    icon_label = tk.Label(icon_frame, text="🏍️", font=('Segoe UI Emoji', emoji_font_size), 
                          bg=MODERN_COLORS['primary'], fg=MODERN_COLORS['white'])
     icon_label.pack(expand=True)
 
-    # Title - mobile typography
+    # Title - responsive typography
+    title_font_size = max(int(32 * responsive_config.scale_factor), 24)
     title = tk.Label(header_frame, text="Money Rider", 
-                    font=('Segoe UI', 32, 'bold'), 
-                    bg=MODERN_COLORS['light'], 
-                    fg=MODERN_COLORS['dark'])
-    title.pack(pady=15)
+                    font=('Segoe UI', title_font_size, 'bold'), 
+                    bg=MODERN_COLORS['background'], 
+                    fg=MODERN_COLORS['text_primary'])
+    title.pack(pady=responsive_config.padding_medium)
 
-    # Subtitle
+    # Subtitle - responsive typography
+    subtitle_font_size = max(int(16 * responsive_config.scale_factor), 12)
     subtitle = tk.Label(header_frame, text="Track your finances with ease", 
-                       font=('Segoe UI', 16), 
-                       bg=MODERN_COLORS['light'], 
-                       fg=MODERN_COLORS['dark'])
-    subtitle.pack(pady=8)
+                       font=('Segoe UI', subtitle_font_size), 
+                       bg=MODERN_COLORS['background'], 
+                       fg=MODERN_COLORS['text_secondary'])
+    subtitle.pack(pady=responsive_config.padding_small)
 
-    # Button container with mobile spacings
-    button_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
-    button_frame.pack(pady=40)
+    # Button container with responsive spacing
+    button_frame = create_modern_frame(main_container, MODERN_COLORS['background'])
+    button_frame.pack(pady=responsive_config.padding_large)
 
-    # Login button - mobile style
+    # Login button - responsive sizing
+    responsive_button_width = max(int(20 * responsive_config.scale_factor), 15)
     login_btn = create_modern_button(button_frame, "📱 Sign In", 
                                    command=lambda:[splash.destroy(), login_screen()],
-                                   style='primary', width=20)
-    login_btn.pack(pady=20)
+                                   style='primary', width=responsive_button_width)
+    login_btn.pack(pady=responsive_config.padding_large)
 
-    # Create account button - mobile style
+    # Create account button - responsive sizing
     create_account_btn = create_modern_button(button_frame, "👤 Create Account", 
                                             command=lambda:[splash.destroy(), create_account_screen()],
-                                            style='secondary', width=20)
-    create_account_btn.pack(pady=15)
+                                            style='secondary', width=responsive_button_width)
+    create_account_btn.pack(pady=responsive_config.padding_medium)
 
-    # Footer - mobile style
-    footer_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
-    footer_frame.pack(side=tk.BOTTOM, pady=20)
+    # Footer - responsive styling
+    footer_frame = create_modern_frame(main_container, MODERN_COLORS['background'])
+    footer_frame.pack(side=tk.BOTTOM, pady=responsive_config.padding_large)
     
+    footer_font_size = max(int(12 * responsive_config.scale_factor), 10)
     footer_text = tk.Label(footer_frame, text="© 2024 Money Rider", 
-                          font=('Segoe UI', 12), 
-                          bg=MODERN_COLORS['light'], 
-                          fg=MODERN_COLORS['dark'])
+                          font=('Segoe UI', footer_font_size), 
+                          bg=MODERN_COLORS['background'], 
+                          fg=MODERN_COLORS['text_secondary'])
     footer_text.pack()
 
     splash.mainloop()
@@ -364,62 +453,68 @@ def create_account_screen():
     
     create = tk.Tk()
     create.title("Create Account - Money Rider")
-    create.geometry("450x800")  # Mobile aspect ratio
-    create.configure(bg=MODERN_COLORS['light'])
+    create.configure(bg=MODERN_COLORS['background'])
     create.resizable(False, False)
 
-    # Center the window
-    create.update_idletasks()
-    x = (create.winfo_screenwidth() // 2) - (450 // 2)
-    y = (create.winfo_screenheight() // 2) - (800 // 2)
-    create.geometry(f"450x800+{x}+{y}")
+    # Center the window with responsive sizing
+    center_window(create)
 
-    # Main container with mobile padding
-    main_container = create_modern_frame(create, MODERN_COLORS['light'])
-    main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+    # Main container with responsive padding
+    main_container = create_modern_frame(create, MODERN_COLORS['background'])
+    main_container.pack(fill=tk.BOTH, expand=True, 
+                       padx=responsive_config.padding_large, 
+                       pady=responsive_config.padding_large)
 
-    # Header - mobile style
-    header_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
-    header_frame.pack(pady=(0, 30))
+    # Header - responsive styling
+    header_frame = create_modern_frame(main_container, MODERN_COLORS['background'])
+    header_frame.pack(pady=(0, responsive_config.padding_medium))
 
     title = tk.Label(header_frame, text="Create Account", 
-                    font=('Segoe UI', 28, 'bold'), 
-                    bg=MODERN_COLORS['light'], 
-                    fg=MODERN_COLORS['dark'])
-    title.pack(pady=15)
+                    font=MODERN_FONTS['title'], 
+                    bg=MODERN_COLORS['background'], 
+                    fg=MODERN_COLORS['text_primary'])
+    title.pack(pady=responsive_config.padding_medium)
 
     subtitle = tk.Label(header_frame, text="Join Money Rider today", 
-                       font=('Segoe UI', 16), 
-                       bg=MODERN_COLORS['light'], 
-                       fg=MODERN_COLORS['dark'])
-    subtitle.pack(pady=5)
+                       font=MODERN_FONTS['subheading'], 
+                       bg=MODERN_COLORS['background'], 
+                       fg=MODERN_COLORS['text_secondary'])
+    subtitle.pack(pady=responsive_config.padding_tiny)
 
-    # Form container - mobile card style
-    form_frame = create_modern_frame(main_container, MODERN_COLORS['white'])
-    form_frame.pack(fill=tk.X, pady=20)
+    # Form container - responsive card style
+    form_frame = create_modern_frame(main_container, MODERN_COLORS['card'])
+    form_frame.pack(fill=tk.X, pady=responsive_config.padding_large)
     form_frame.configure(relief='solid', bd=2)
 
-    # Username field - mobile style
+    # Username field - responsive styling
     tk.Label(form_frame, text="Username", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(anchor='w', padx=25, pady=(25, 8))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(anchor='w', 
+                                                   padx=responsive_config.padding_medium, 
+                                                   pady=(responsive_config.padding_medium, responsive_config.padding_small))
     
     username_entry = create_modern_entry(form_frame)
-    username_entry.pack(fill=tk.X, padx=25, pady=(0, 20))
+    username_entry.pack(fill=tk.X, 
+                       padx=responsive_config.padding_medium, 
+                       pady=(0, responsive_config.padding_large))
 
-    # Password field - mobile style
+    # Password field - responsive styling
     tk.Label(form_frame, text="Password", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(anchor='w', padx=25, pady=(15, 8))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(anchor='w', 
+                                                   padx=responsive_config.padding_medium, 
+                                                   pady=(responsive_config.padding_medium, responsive_config.padding_small))
     
     password_var = tk.StringVar()
     password_entry = create_modern_entry(form_frame, show="*")
     password_entry.config(textvariable=password_var)
-    password_entry.pack(fill=tk.X, padx=25, pady=(0, 10))
+    password_entry.pack(fill=tk.X, 
+                       padx=responsive_config.padding_medium, 
+                       pady=(0, responsive_config.padding_small))
 
-    # Password visibility toggle - mobile style
+    # Password visibility toggle - responsive styling
     def toggle_pw():
         if password_entry.cget("show") == "":
             password_entry.config(show="*")
@@ -428,8 +523,10 @@ def create_account_screen():
             password_entry.config(show="")
             eye_btn.config(text="🙈 Hide Password")
     
-    eye_btn = create_modern_button(form_frame, "👁 Show Password", command=toggle_pw, style='secondary', width=20)
-    eye_btn.pack(pady=(0, 25))
+    responsive_button_width = max(int(20 * responsive_config.scale_factor), 15)
+    eye_btn = create_modern_button(form_frame, "👁 Show Password", command=toggle_pw, 
+                                  style='secondary', width=responsive_button_width)
+    eye_btn.pack(pady=(0, responsive_config.padding_medium))
 
     def create_account():
         username = username_entry.get().strip()
@@ -449,21 +546,21 @@ def create_account_screen():
         create.destroy()
         splash_screen()
 
-    # Button container - mobile style
-    button_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
-    button_frame.pack(pady=30)
+    # Button container - responsive styling
+    button_frame = create_modern_frame(main_container, MODERN_COLORS['background'])
+    button_frame.pack(pady=responsive_config.padding_medium)
 
-    # Create button - mobile style
+    # Create button - responsive sizing
     create_btn = create_modern_button(button_frame, "✅ Create Account", 
                                     command=create_account,
-                                    style='primary', width=20)
-    create_btn.pack(pady=20)
+                                    style='primary', width=responsive_button_width)
+    create_btn.pack(pady=responsive_config.padding_large)
 
-    # Back button - mobile style
+    # Back button - responsive sizing
     back_btn = create_modern_button(button_frame, "← Back to Sign In", 
                                   command=lambda: [create.destroy(), splash_screen()],
-                                  style='secondary', width=20)
-    back_btn.pack(pady=10)
+                                  style='secondary', width=responsive_button_width)
+    back_btn.pack(pady=responsive_config.padding_small)
 
 # ---------------- Login ----------------
 def login_screen():
@@ -472,62 +569,68 @@ def login_screen():
     
     login = tk.Tk()
     login.title("Sign In - Money Rider")
-    login.geometry("450x800")  # Mobile aspect ratio
-    login.configure(bg=MODERN_COLORS['light'])
+    login.configure(bg=MODERN_COLORS['background'])
     login.resizable(False, False)
 
-    # Center the window
-    login.update_idletasks()
-    x = (login.winfo_screenwidth() // 2) - (450 // 2)
-    y = (login.winfo_screenheight() // 2) - (800 // 2)
-    login.geometry(f"450x800+{x}+{y}")
+    # Center the window with responsive sizing
+    center_window(login)
 
-    # Main container with mobile padding
-    main_container = create_modern_frame(login, MODERN_COLORS['light'])
-    main_container.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
+    # Main container with responsive padding
+    main_container = create_modern_frame(login, MODERN_COLORS['background'])
+    main_container.pack(fill=tk.BOTH, expand=True, 
+                       padx=responsive_config.padding_large, 
+                       pady=responsive_config.padding_large)
 
-    # Header - mobile style
-    header_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
-    header_frame.pack(pady=(0, 30))
+    # Header - responsive styling
+    header_frame = create_modern_frame(main_container, MODERN_COLORS['background'])
+    header_frame.pack(pady=(0, responsive_config.padding_medium))
 
     title = tk.Label(header_frame, text="Welcome Back", 
-                    font=('Segoe UI', 28, 'bold'), 
-                    bg=MODERN_COLORS['light'], 
-                    fg=MODERN_COLORS['dark'])
-    title.pack(pady=15)
+                    font=MODERN_FONTS['title'], 
+                    bg=MODERN_COLORS['background'], 
+                    fg=MODERN_COLORS['text_primary'])
+    title.pack(pady=responsive_config.padding_medium)
 
     subtitle = tk.Label(header_frame, text="Sign in to your account", 
-                       font=('Segoe UI', 16), 
-                       bg=MODERN_COLORS['light'], 
-                       fg=MODERN_COLORS['dark'])
-    subtitle.pack(pady=5)
+                       font=MODERN_FONTS['subheading'], 
+                       bg=MODERN_COLORS['background'], 
+                       fg=MODERN_COLORS['text_secondary'])
+    subtitle.pack(pady=responsive_config.padding_tiny)
 
-    # Form container - mobile card style
-    form_frame = create_modern_frame(main_container, MODERN_COLORS['white'])
-    form_frame.pack(fill=tk.X, pady=20)
+    # Form container - responsive card style
+    form_frame = create_modern_frame(main_container, MODERN_COLORS['card'])
+    form_frame.pack(fill=tk.X, pady=responsive_config.padding_large)
     form_frame.configure(relief='solid', bd=2)
 
-    # Username field - mobile style
+    # Username field - responsive styling
     tk.Label(form_frame, text="Username", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(anchor='w', padx=25, pady=(25, 8))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(anchor='w', 
+                                                   padx=responsive_config.padding_medium, 
+                                                   pady=(responsive_config.padding_medium, responsive_config.padding_small))
     
     username_entry = create_modern_entry(form_frame)
-    username_entry.pack(fill=tk.X, padx=25, pady=(0, 20))
+    username_entry.pack(fill=tk.X, 
+                       padx=responsive_config.padding_medium, 
+                       pady=(0, responsive_config.padding_large))
 
-    # Password field - mobile style
+    # Password field - responsive styling
     tk.Label(form_frame, text="Password", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(anchor='w', padx=25, pady=(15, 8))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(anchor='w', 
+                                                   padx=responsive_config.padding_medium, 
+                                                   pady=(responsive_config.padding_medium, responsive_config.padding_small))
     
     password_var = tk.StringVar()
     password_entry = create_modern_entry(form_frame, show="*")
     password_entry.config(textvariable=password_var)
-    password_entry.pack(fill=tk.X, padx=25, pady=(0, 10))
+    password_entry.pack(fill=tk.X, 
+                       padx=responsive_config.padding_medium, 
+                       pady=(0, responsive_config.padding_small))
 
-    # Password visibility toggle - mobile style
+    # Password visibility toggle - responsive styling
     def toggle_pw():
         if password_entry.cget("show") == "":
             password_entry.config(show="*")
@@ -536,8 +639,10 @@ def login_screen():
             password_entry.config(show="")
             eye_btn.config(text="🙈 Hide Password")
     
-    eye_btn = create_modern_button(form_frame, "👁 Show Password", command=toggle_pw, style='secondary', width=20)
-    eye_btn.pack(pady=(0, 25))
+    responsive_button_width = max(int(20 * responsive_config.scale_factor), 15)
+    eye_btn = create_modern_button(form_frame, "👁 Show Password", command=toggle_pw, 
+                                  style='secondary', width=responsive_button_width)
+    eye_btn.pack(pady=(0, responsive_config.padding_medium))
 
     def validate_login():
         username = username_entry.get().strip()
@@ -552,21 +657,21 @@ def login_screen():
         else:
             messagebox.showerror("Error", "Invalid username or password!")
 
-    # Button container - mobile style
-    button_frame = create_modern_frame(main_container, MODERN_COLORS['light'])
-    button_frame.pack(pady=10)
+    # Button container - responsive styling
+    button_frame = create_modern_frame(main_container, MODERN_COLORS['background'])
+    button_frame.pack(pady=responsive_config.padding_small)
 
-    # Login button - mobile style
+    # Login button - responsive sizing
     login_btn = create_modern_button(button_frame, "🔑 Sign In", 
                                    command=validate_login,
-                                   style='primary', width=20)
-    login_btn.pack(pady=20)
+                                   style='primary', width=responsive_button_width)
+    login_btn.pack(pady=responsive_config.padding_large)
 
-    # Back button - mobile style
+    # Back button - responsive sizing
     back_btn = create_modern_button(button_frame, "← Back to Home", 
                                   command=lambda: [login.destroy(), splash_screen()],
-                                  style='secondary', width=20)
-    back_btn.pack(pady=10)
+                                  style='secondary', width=responsive_button_width)
+    back_btn.pack(pady=responsive_config.padding_small)
 
     # Add global undo shortcut
     add_global_undo_shortcut(login)
@@ -581,15 +686,11 @@ def calendar_screen():
     
     cal = tk.Tk()
     cal.title("Money Rider - Calendar")
-    cal.geometry("450x800")  # Mobile-like aspect ratio with more height
-    cal.configure(bg=MODERN_COLORS['light'])
+    cal.configure(bg=MODERN_COLORS['background'])
     cal.resizable(False, False)
 
-    # Center the window
-    cal.update_idletasks()
-    x = (cal.winfo_screenwidth() // 2) - (450 // 2)
-    y = (cal.winfo_screenheight() // 2) - (800 // 2)
-    cal.geometry(f"450x800+{x}+{y}")
+    # Center the window with responsive sizing
+    center_window(cal)
 
     current_date = datetime.now()
     current_year = current_date.year
@@ -727,26 +828,28 @@ def calendar_screen():
         for widget in cal.winfo_children():
             widget.destroy()
 
-        # Main container with scrolling
-        cal_frame = create_scrollable_frame(cal, MODERN_COLORS['light'])
-        cal_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        # Main container with scrolling and responsive padding
+        cal_frame = create_scrollable_frame(cal, MODERN_COLORS['background'])
+        cal_frame.pack(fill=tk.BOTH, expand=True, 
+                       padx=responsive_config.padding_small, 
+                       pady=responsive_config.padding_small)
         
         # Get the scrollable frame for adding widgets
         scrollable_content = cal_frame.scrollable_frame
 
         # Header with title and controls
-        header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
-        header_frame.pack(fill=tk.X, pady=(0, 20))
+        header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
+        header_frame.pack(fill=tk.X, pady=(0, responsive_config.padding_large))
 
         # Title
         title_label = tk.Label(header_frame, text="Financial Calendar", 
-                             font=MODERN_FONTS['heading'], 
-                             bg=MODERN_COLORS['light'], 
-                             fg=MODERN_COLORS['dark'])
-        title_label.pack(pady=(0, 15))
+                              font=MODERN_FONTS['heading'], 
+                              bg=MODERN_COLORS['background'], 
+                              fg=MODERN_COLORS['text_primary'])
+        title_label.pack(pady=(0, responsive_config.padding_medium))
 
         # Month and year selection
-        controls_frame = create_modern_frame(header_frame, MODERN_COLORS['light'])
+        controls_frame = create_modern_frame(header_frame, MODERN_COLORS['background'])
         controls_frame.pack()
 
         # Set current values
@@ -771,19 +874,21 @@ def calendar_screen():
         year_menu.bind("<<ComboboxSelected>>", lambda e: change_year())
 
         # Calendar container
-        calendar_container = create_modern_frame(scrollable_content, MODERN_COLORS['white'])
-        calendar_container.pack(fill=tk.BOTH, expand=True, pady=10, padx=5)
+        calendar_container = create_modern_frame(scrollable_content, MODERN_COLORS['card'])
+        calendar_container.pack(fill=tk.BOTH, expand=True, 
+                               pady=responsive_config.padding_small, 
+                               padx=responsive_config.padding_tiny)
         calendar_container.configure(relief='solid', bd=1)
 
         # Days of week header
-        days_frame = create_modern_frame(calendar_container, MODERN_COLORS['light'])
+        days_frame = create_modern_frame(calendar_container, MODERN_COLORS['card'])
         days_frame.pack(fill=tk.X, padx=5, pady=10)
 
         days_of_week = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         for col, day in enumerate(days_of_week):
             day_label = tk.Label(days_frame, text=day, 
-                               bg=MODERN_COLORS['light'], 
-                               fg=MODERN_COLORS['dark'],
+                               bg=MODERN_COLORS['card'], 
+                               fg=MODERN_COLORS['text_primary'],
                                font=MODERN_FONTS['body'])
             day_label.grid(row=0, column=col, padx=1, pady=5, sticky='ew')
         
@@ -792,7 +897,7 @@ def calendar_screen():
             days_frame.grid_columnconfigure(i, weight=1)
 
         # Calendar days grid
-        days_grid_frame = create_modern_frame(calendar_container, MODERN_COLORS['white'])
+        days_grid_frame = create_modern_frame(calendar_container, MODERN_COLORS['card'])
         days_grid_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=(0, 10))
         
         month_cal = calendar.monthcalendar(current_year, current_month)
@@ -856,22 +961,22 @@ def calendar_screen():
             days_grid_frame.grid_rowconfigure(i, weight=1)
 
         # Date range calculation section
-        range_container = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
+        range_container = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
         range_container.pack(fill=tk.X, pady=15, padx=5)
 
         range_title = tk.Label(range_container, text="Date Range Calculator", 
                               font=MODERN_FONTS['subheading'], 
-                              bg=MODERN_COLORS['light'], 
-                              fg=MODERN_COLORS['dark'])
+                              bg=MODERN_COLORS['background'], 
+                              fg=MODERN_COLORS['text_primary'])
         range_title.pack(pady=(0, 10))
 
         # Range input frame
-        range_frame = create_modern_frame(range_container, MODERN_COLORS['white'])
+        range_frame = create_modern_frame(range_container, MODERN_COLORS['card'])
         range_frame.pack(fill=tk.X, pady=10)
         range_frame.configure(relief='solid', bd=1)
 
         # Date input frame using grid for better width utilization
-        date_input_frame = create_modern_frame(range_frame, MODERN_COLORS['white'])
+        date_input_frame = create_modern_frame(range_frame, MODERN_COLORS['card'])
         date_input_frame.pack(fill=tk.X, padx=10, pady=10)
         
         # Configure grid weights for better distribution
@@ -1028,21 +1133,22 @@ def calendar_screen():
                                          style='primary', width=20)
         calc_button.pack(pady=10)
 
-        # Navigation buttons - mobile style
-        nav_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
-        nav_frame.pack(pady=20)
+        # Navigation buttons - responsive styling
+        nav_frame = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
+        nav_frame.pack(pady=responsive_config.padding_large)
 
-        # Undo button - mobile style
+        # Undo button - responsive sizing
+        responsive_button_width = max(int(20 * responsive_config.scale_factor), 15)
         undo_btn = create_undo_button(nav_frame, 
                                      command=lambda: [cal.destroy(), navigate_back()],
-                                     style='warning', width=20)
-        undo_btn.pack(pady=5)
+                                     style='warning', width=responsive_button_width)
+        undo_btn.pack(pady=responsive_config.padding_tiny)
 
-        # Sign out button with better mobile styling
+        # Sign out button with responsive styling
         signout_btn = create_modern_button(nav_frame, "🚪 Sign Out", 
                                           command=lambda: [cal.destroy(), login_screen()],
-                                          style='danger', width=20)
-        signout_btn.pack(pady=5)
+                                          style='danger', width=responsive_button_width)
+        signout_btn.pack(pady=responsive_config.padding_tiny)
 
     def change_month():
         nonlocal current_month
@@ -1068,24 +1174,23 @@ def income_screen(day, year, month):
     
     inc = tk.Tk()
     inc.title("Financial Tracking - Money Rider")
-    inc.geometry("450x800")  # Mobile aspect ratio with more height
-    inc.configure(bg=MODERN_COLORS['light'])
+    inc.configure(bg=MODERN_COLORS['background'])
     inc.resizable(False, False)
 
-    # Center the window
-    inc.update_idletasks()
-    x = (inc.winfo_screenwidth() // 2) - (450 // 2)
-    y = (inc.winfo_screenheight() // 2) - (800 // 2)
-    inc.geometry(f"450x800+{x}+{y}")
+    # Center the window with responsive sizing
+    center_window(inc)
 
-    # Floating undo button in top-right corner
+    # Floating undo button in top-right corner with responsive positioning
+    floating_button_size = max(int(40 * responsive_config.scale_factor), 30)
+    floating_x = responsive_config.window_width - floating_button_size - 10
     floating_undo_frame = create_modern_frame(inc, MODERN_COLORS['primary'])
-    floating_undo_frame.place(x=400, y=10, width=40, height=40)
+    floating_undo_frame.place(x=floating_x, y=10, width=floating_button_size, height=floating_button_size)
     
+    floating_font_size = max(int(16 * responsive_config.scale_factor), 12)
     floating_undo_btn = tk.Button(floating_undo_frame, text="←", 
                                  command=lambda: [inc.destroy(), navigate_back()],
                                  bg=MODERN_COLORS['primary'], fg=MODERN_COLORS['white'],
-                                 font=('Segoe UI', 16, 'bold'), relief='flat', bd=0,
+                                 font=('Segoe UI', floating_font_size, 'bold'), relief='flat', bd=0,
                                  cursor='hand2', activebackground=MODERN_COLORS['primary_dark'])
     floating_undo_btn.pack(fill=tk.BOTH, expand=True)
 
@@ -1099,40 +1204,45 @@ def income_screen(day, year, month):
     # Store the current date
     current_date_str = f"{year}-{month:02d}-{day:02d}"
 
-    # Main container with mobile-like padding and scrolling
-    main_container = create_scrollable_frame(inc, MODERN_COLORS['light'])
-    main_container.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+    # Main container with responsive padding and scrolling
+    main_container = create_scrollable_frame(inc, MODERN_COLORS['background'])
+    main_container.pack(fill=tk.BOTH, expand=True, 
+                       padx=responsive_config.padding_medium, 
+                       pady=responsive_config.padding_medium)
     
     # Get the scrollable frame for adding widgets
     scrollable_content = main_container.scrollable_frame
 
     # Header section
-    header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
-    header_frame.pack(fill=tk.X, pady=(0, 20))
+    header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
+    header_frame.pack(fill=tk.X, pady=(0, responsive_config.padding_large))
 
-    # Title - mobile style
+    # Title - responsive styling
+    title_font_size = max(int(24 * responsive_config.scale_factor), 18)
     title_label = tk.Label(header_frame, text="Financial Tracking", 
-                          font=('Segoe UI', 24, 'bold'), 
-                          bg=MODERN_COLORS['light'], 
-                          fg=MODERN_COLORS['dark'])
-    title_label.pack(pady=(0, 10))
+                          font=('Segoe UI', title_font_size, 'bold'), 
+                          bg=MODERN_COLORS['background'], 
+                          fg=MODERN_COLORS['text_primary'])
+    title_label.pack(pady=(0, responsive_config.padding_small))
 
-    # Date display - mobile style
+    # Date display - responsive styling
+    date_font_size = max(int(16 * responsive_config.scale_factor), 12)
     date_label = tk.Label(header_frame, text=f"{year}-{month:02d}-{day:02d}",
-                         font=('Segoe UI', 16), 
-                         bg=MODERN_COLORS['light'], 
-                         fg=MODERN_COLORS['dark'])
-    date_label.pack(pady=5)
+                         font=('Segoe UI', date_font_size), 
+                         bg=MODERN_COLORS['background'], 
+                         fg=MODERN_COLORS['text_primary'])
+    date_label.pack(pady=responsive_config.padding_tiny)
 
     # Undo button at the top for better visibility
+    responsive_button_width = max(int(15 * responsive_config.scale_factor), 12)
     top_undo_btn = create_undo_button(header_frame, 
                                      command=lambda: [inc.destroy(), navigate_back()],
-                                     style='warning', width=15)
-    top_undo_btn.pack(pady=5)
+                                     style='warning', width=responsive_button_width)
+    top_undo_btn.pack(pady=responsive_config.padding_tiny)
 
-    # Input section with mobile-like cards
-    input_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
-    input_frame.pack(fill=tk.X, pady=(0, 15))
+    # Input section with responsive cards
+    input_frame = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
+    input_frame.pack(fill=tk.X, pady=(0, responsive_config.padding_medium))
     
     # Create notebook for tabs with mobile styling
     notebook = ttk.Notebook(input_frame)
@@ -1144,33 +1254,43 @@ def income_screen(day, year, month):
     style.configure('TNotebook.Tab', padding=[20, 10], font=MODERN_FONTS['body'])
 
     # Income tab with mobile card styling
-    income_tab = create_modern_frame(notebook, MODERN_COLORS['white'])
+    income_tab = create_modern_frame(notebook, MODERN_COLORS['card'])
     notebook.add(income_tab, text="💰 Income")
 
     # Income card container
-    income_card = create_modern_frame(income_tab, MODERN_COLORS['white'])
-    income_card.pack(fill=tk.X, padx=15, pady=15)
+    income_card = create_modern_frame(income_tab, MODERN_COLORS['card'])
+    income_card.pack(fill=tk.X, 
+                    padx=responsive_config.padding_medium, 
+                    pady=responsive_config.padding_medium)
     income_card.configure(relief='solid', bd=1)
 
-    # Income Source field with mobile styling
+    # Income Source field with responsive styling
     tk.Label(income_card, text="Income Source", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(anchor='w', padx=15, pady=(15, 5))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(anchor='w', 
+                                                   padx=responsive_config.padding_medium, 
+                                                   pady=(responsive_config.padding_medium, responsive_config.padding_tiny))
     
     name_entry = create_modern_entry(income_card)
     name_entry.config(textvariable=name_var)
-    name_entry.pack(fill=tk.X, padx=15, pady=(0, 10))
+    name_entry.pack(fill=tk.X, 
+                   padx=responsive_config.padding_medium, 
+                   pady=(0, responsive_config.padding_small))
 
-    # Income amount field with mobile styling
+    # Income amount field with responsive styling
     tk.Label(income_card, text="Amount (₱)", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(anchor='w', padx=15, pady=(10, 5))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(anchor='w', 
+                                                   padx=responsive_config.padding_medium, 
+                                                   pady=(responsive_config.padding_small, responsive_config.padding_tiny))
     
     income_entry = create_modern_entry(income_card)
     income_entry.config(textvariable=income_var)
-    income_entry.pack(fill=tk.X, padx=15, pady=(0, 15))
+    income_entry.pack(fill=tk.X, 
+                     padx=responsive_config.padding_medium, 
+                     pady=(0, responsive_config.padding_medium))
 
     # Define functions before buttons
     def enter_income():
@@ -1218,33 +1338,40 @@ def income_screen(day, year, month):
         # autosave to user's financial_data
         save_data(current_date_str)
 
-    # Add Income button with mobile styling
+    # Add Income button with responsive styling
+    responsive_button_width = max(int(25 * responsive_config.scale_factor), 20)
     add_income_btn = create_modern_button(income_card, "➕ Add Income", 
                                         command=enter_income,
-                                        style='success', width=25)
-    add_income_btn.pack(pady=(0, 15))
+                                        style='success', width=responsive_button_width)
+    add_income_btn.pack(pady=(0, responsive_config.padding_medium))
 
     # Expenses tab with mobile card styling
-    expense_tab = create_modern_frame(notebook, MODERN_COLORS['white'])
+    expense_tab = create_modern_frame(notebook, MODERN_COLORS['card'])
     notebook.add(expense_tab, text="💸 Expenses")
 
     # Expense card container
-    expense_card = create_modern_frame(expense_tab, MODERN_COLORS['white'])
-    expense_card.pack(fill=tk.X, padx=15, pady=15)
+    expense_card = create_modern_frame(expense_tab, MODERN_COLORS['card'])
+    expense_card.pack(fill=tk.X, 
+                     padx=responsive_config.padding_medium, 
+                     pady=responsive_config.padding_medium)
     expense_card.configure(relief='solid', bd=1)
 
-    # Expense Category field with mobile styling
+    # Expense Category field with responsive styling
     tk.Label(expense_card, text="Category", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(anchor='w', padx=15, pady=(15, 5))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(anchor='w', 
+                                                   padx=responsive_config.padding_medium, 
+                                                   pady=(responsive_config.padding_medium, responsive_config.padding_tiny))
     
-    # Category dropdown with mobile styling
+    # Category dropdown with responsive styling
     category_var = tk.StringVar()
     categories = ["Food", "Gas", "Maintenance", "Other"]
     cat_menu = ttk.Combobox(expense_card, values=categories, textvariable=category_var, 
                            state="readonly", font=MODERN_FONTS['body'])
-    cat_menu.pack(fill=tk.X, padx=15, pady=(0, 10))
+    cat_menu.pack(fill=tk.X, 
+                  padx=responsive_config.padding_medium, 
+                  pady=(0, responsive_config.padding_small))
     cat_menu.set(categories[0])
 
     # Custom category entry (hidden by default)
@@ -1255,100 +1382,121 @@ def income_screen(day, year, month):
     # Show/hide custom entry based on category selection
     def on_cat_change(e=None):
         if category_var.get() == "Other":
-            custom_entry.pack(fill=tk.X, padx=15, pady=(0, 10))
+            custom_entry.pack(fill=tk.X, 
+                             padx=responsive_config.padding_medium, 
+                             pady=(0, responsive_config.padding_small))
         else:
             custom_entry.pack_forget()
     cat_menu.bind("<<ComboboxSelected>>", on_cat_change)
 
-    # Expense amount field with mobile styling
+    # Expense amount field with responsive styling
     tk.Label(expense_card, text="Amount (₱)", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(anchor='w', padx=15, pady=(10, 5))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(anchor='w', 
+                                                   padx=responsive_config.padding_medium, 
+                                                   pady=(responsive_config.padding_small, responsive_config.padding_tiny))
     
     expense_amount_entry = create_modern_entry(expense_card)
     expense_amount_entry.config(textvariable=amount_var)
-    expense_amount_entry.pack(fill=tk.X, padx=15, pady=(0, 15))
+    expense_amount_entry.pack(fill=tk.X, 
+                             padx=responsive_config.padding_medium, 
+                             pady=(0, responsive_config.padding_medium))
 
-    # Add Expense button with mobile styling
+    # Add Expense button with responsive styling
     add_expense_btn = create_modern_button(expense_card, "➕ Add Expense", 
                                          command=enter_expense,
-                                         style='success', width=25)
-    add_expense_btn.pack(pady=(0, 15))
+                                         style='success', width=responsive_button_width)
+    add_expense_btn.pack(pady=(0, responsive_config.padding_medium))
 
     # Display section with tabs
-    display_frame = create_modern_frame(scrollable_content, MODERN_COLORS['white'])
-    display_frame.pack(fill=tk.X, pady=(0, 15))
-    display_frame.configure(relief='solid', bd=1, height=200)
+    display_frame = create_modern_frame(scrollable_content, MODERN_COLORS['card'])
+    display_frame.pack(fill=tk.X, pady=(0, responsive_config.padding_medium))
+    display_height = max(int(200 * responsive_config.scale_factor), 150)
+    display_frame.configure(relief='solid', bd=1, height=display_height)
 
     # Create notebook for display tabs
     display_notebook = ttk.Notebook(display_frame)
-    display_notebook.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    display_notebook.pack(fill=tk.BOTH, expand=True, 
+                         padx=responsive_config.padding_small, 
+                         pady=responsive_config.padding_small)
 
     # Income display tab
-    income_display_tab = create_modern_frame(display_notebook, MODERN_COLORS['white'])
+    income_display_tab = create_modern_frame(display_notebook, MODERN_COLORS['card'])
     display_notebook.add(income_display_tab, text="💰 Income List")
 
     # Header for income list
-    income_header = create_modern_frame(income_display_tab, MODERN_COLORS['light'])
-    income_header.pack(fill=tk.X, padx=10, pady=10)
+    income_header = create_modern_frame(income_display_tab, MODERN_COLORS['card'])
+    income_header.pack(fill=tk.X, 
+                      padx=responsive_config.padding_small, 
+                      pady=responsive_config.padding_small)
 
     tk.Label(income_header, text="Income Source", 
             font=MODERN_FONTS['body'], 
-            bg=MODERN_COLORS['light'], 
-            fg=MODERN_COLORS['dark']).pack(side=tk.LEFT, padx=10)
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(side=tk.LEFT, 
+                                                   padx=responsive_config.padding_small)
     
     tk.Label(income_header, text="Amount", 
             font=MODERN_FONTS['body'], 
-            bg=MODERN_COLORS['light'], 
-            fg=MODERN_COLORS['dark']).pack(side=tk.RIGHT, padx=10)
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(side=tk.RIGHT, 
+                                                   padx=responsive_config.padding_small)
 
     # Create income listbox with double-click editing
     income_listbox = tk.Listbox(income_display_tab, 
                                font=MODERN_FONTS['body'],
                                bg=MODERN_COLORS['white'], 
-                               fg=MODERN_COLORS['dark'],
+                               fg=MODERN_COLORS['text_primary'],
                                selectbackground=MODERN_COLORS['primary'],
                                selectforeground=MODERN_COLORS['white'],
                                relief='flat',
                                bd=0,
                                highlightthickness=0,
                                cursor='hand2')  # Show hand cursor to indicate clickable
-    income_listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+    income_listbox.pack(fill=tk.BOTH, expand=True, 
+                       padx=responsive_config.padding_small, 
+                       pady=(0, responsive_config.padding_small))
     
     # Bind double-click to edit income
     income_listbox.bind('<Double-Button-1>', lambda e: edit_income_selected())
 
     # Expenses display tab
-    expense_display_tab = create_modern_frame(display_notebook, MODERN_COLORS['white'])
+    expense_display_tab = create_modern_frame(display_notebook, MODERN_COLORS['card'])
     display_notebook.add(expense_display_tab, text="💸 Expense List")
 
     # Header for expense list
-    expense_header = create_modern_frame(expense_display_tab, MODERN_COLORS['light'])
-    expense_header.pack(fill=tk.X, padx=10, pady=10)
+    expense_header = create_modern_frame(expense_display_tab, MODERN_COLORS['card'])
+    expense_header.pack(fill=tk.X, 
+                       padx=responsive_config.padding_small, 
+                       pady=responsive_config.padding_small)
 
     tk.Label(expense_header, text="Expense Category", 
             font=MODERN_FONTS['body'], 
-            bg=MODERN_COLORS['light'], 
-            fg=MODERN_COLORS['dark']).pack(side=tk.LEFT, padx=10)
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(side=tk.LEFT, 
+                                                   padx=responsive_config.padding_small)
     
     tk.Label(expense_header, text="Amount", 
             font=MODERN_FONTS['body'], 
-            bg=MODERN_COLORS['light'], 
-            fg=MODERN_COLORS['dark']).pack(side=tk.RIGHT, padx=10)
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(side=tk.RIGHT, 
+                                                   padx=responsive_config.padding_small)
 
     # Create expense listbox with double-click editing
     expense_listbox = tk.Listbox(expense_display_tab, 
                                 font=MODERN_FONTS['body'],
                                 bg=MODERN_COLORS['white'], 
-                                fg=MODERN_COLORS['dark'],
+                                fg=MODERN_COLORS['text_primary'],
                                 selectbackground=MODERN_COLORS['primary'],
                                 selectforeground=MODERN_COLORS['white'],
                                 relief='flat',
                                 bd=0,
                                 highlightthickness=0,
                                 cursor='hand2')  # Show hand cursor to indicate clickable
-    expense_listbox.pack(fill=tk.BOTH, expand=True, padx=10, pady=(0, 10))
+    expense_listbox.pack(fill=tk.BOTH, expand=True, 
+                        padx=responsive_config.padding_small, 
+                        pady=(0, responsive_config.padding_small))
     
     # Bind double-click to edit expense
     expense_listbox.bind('<Double-Button-1>', lambda e: edit_expense_selected())
@@ -1579,82 +1727,89 @@ def income_screen(day, year, month):
             save_data(current_date_str)
             messagebox.showinfo("Success", "Expense entry deleted successfully!")
 
-    # Mobile-style button section
-    button_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
-    button_frame.pack(fill=tk.X, pady=10)
+    # Responsive button section
+    button_frame = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
+    button_frame.pack(fill=tk.X, pady=responsive_config.padding_small)
 
-    # Undo button (bottom section) - mobile style
+    # Undo button (bottom section) - responsive sizing
+    responsive_button_width = max(int(18 * responsive_config.scale_factor), 15)
     undo_btn = create_modern_button(button_frame, "← Back to Calendar", 
                                    command=lambda: [inc.destroy(), navigate_back()],
-                                   style='warning', width=18)
-    undo_btn.pack(pady=5)
+                                   style='warning', width=responsive_button_width)
+    undo_btn.pack(pady=responsive_config.padding_tiny)
 
-    # Action buttons in mobile card style
+    # Action buttons in responsive card style
     action_card = create_modern_frame(button_frame, MODERN_COLORS['white'])
-    action_card.pack(fill=tk.X, pady=10)
+    action_card.pack(fill=tk.X, pady=responsive_config.padding_small)
     action_card.configure(relief='solid', bd=1)
 
     # Income management section
     tk.Label(action_card, text="📊 Manage Income", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(pady=(15, 5))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(pady=(responsive_config.padding_medium, responsive_config.padding_tiny))
     
     # Instruction label for income
     tk.Label(action_card, text="💡 Double-click an item to edit, or use buttons below", 
-            font=('Segoe UI', 10), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(pady=(0, 10))
+            font=MODERN_FONTS['small'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(pady=(0, responsive_config.padding_small))
 
     income_btn_row = create_modern_frame(action_card, MODERN_COLORS['white'])
-    income_btn_row.pack(fill=tk.X, padx=15, pady=(0, 10))
+    income_btn_row.pack(fill=tk.X, 
+                       padx=responsive_config.padding_medium, 
+                       pady=(0, responsive_config.padding_small))
 
+    responsive_button_width_small = max(int(12 * responsive_config.scale_factor), 10)
     edit_income_btn = create_modern_button(income_btn_row, "✏️ Edit", 
                                          command=edit_income_selected,
-                                         style='secondary', width=12)
-    edit_income_btn.pack(side=tk.LEFT, padx=5)
+                                         style='secondary', width=responsive_button_width_small)
+    edit_income_btn.pack(side=tk.LEFT, padx=responsive_config.padding_tiny)
 
     delete_income_btn = create_modern_button(income_btn_row, "🗑️ Delete", 
                                            command=delete_income_selected,
-                                           style='danger', width=12)
-    delete_income_btn.pack(side=tk.LEFT, padx=5)
+                                           style='danger', width=responsive_button_width_small)
+    delete_income_btn.pack(side=tk.LEFT, padx=responsive_config.padding_tiny)
 
     # Expense management section
     tk.Label(action_card, text="💸 Manage Expenses", 
-            font=('Segoe UI', 16, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(pady=(15, 5))
+            font=MODERN_FONTS['subheading'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(pady=(responsive_config.padding_medium, responsive_config.padding_tiny))
     
     # Instruction label for expenses
     tk.Label(action_card, text="💡 Double-click an item to edit, or use buttons below", 
-            font=('Segoe UI', 10), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(pady=(0, 10))
+            font=MODERN_FONTS['small'], 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(pady=(0, responsive_config.padding_small))
 
     expense_btn_row = create_modern_frame(action_card, MODERN_COLORS['white'])
-    expense_btn_row.pack(fill=tk.X, padx=15, pady=(0, 15))
+    expense_btn_row.pack(fill=tk.X, 
+                        padx=responsive_config.padding_medium, 
+                        pady=(0, responsive_config.padding_medium))
 
     edit_expense_btn = create_modern_button(expense_btn_row, "✏️ Edit", 
                                           command=edit_expense_selected,
-                                          style='secondary', width=12)
-    edit_expense_btn.pack(side=tk.LEFT, padx=5)
+                                          style='secondary', width=responsive_button_width_small)
+    edit_expense_btn.pack(side=tk.LEFT, padx=responsive_config.padding_tiny)
 
     delete_expense_btn = create_modern_button(expense_btn_row, "🗑️ Delete", 
                                             command=delete_expense_selected,
-                                            style='danger', width=12)
-    delete_expense_btn.pack(side=tk.LEFT, padx=5)
+                                            style='danger', width=responsive_button_width_small)
+    delete_expense_btn.pack(side=tk.LEFT, padx=responsive_config.padding_tiny)
 
-    # Navigation button - mobile style
+    # Navigation button - responsive sizing
+    responsive_button_width_large = max(int(25 * responsive_config.scale_factor), 20)
     next_btn = create_modern_button(button_frame, "📈 View Summary", 
                                   command=lambda:[save_data(current_date_str), inc.destroy(), total_screen(day, year, month)],
-                                  style='success', width=25)
-    next_btn.pack(pady=5)
+                                  style='success', width=responsive_button_width_large)
+    next_btn.pack(pady=responsive_config.padding_tiny)
 
-    # Sign out button - mobile style
+    # Sign out button - responsive sizing
     signout_btn = create_modern_button(button_frame, "🚪 Sign Out", 
                                       command=lambda:[inc.destroy(), login_screen()],
-                                      style='danger', width=20)
-    signout_btn.pack(pady=5)
+                                      style='danger', width=responsive_button_width)
+    signout_btn.pack(pady=responsive_config.padding_tiny)
 
     # Add global undo shortcut
     add_global_undo_shortcut(inc)
@@ -1668,15 +1823,11 @@ def expenses_screen(day, year, month):
     
     exp = tk.Tk()
     exp.title("Expense Tracking - Money Rider")
-    exp.geometry("450x800")
-    exp.configure(bg=MODERN_COLORS['light'])
+    exp.configure(bg=MODERN_COLORS['background'])
     exp.resizable(False, False)
 
-    # Center the window
-    exp.update_idletasks()
-    x = (exp.winfo_screenwidth() // 2) - (450 // 2)
-    y = (exp.winfo_screenheight() // 2) - (800 // 2)
-    exp.geometry(f"450x800+{x}+{y}")
+    # Center the window with responsive sizing
+    center_window(exp)
 
     expense_var = tk.StringVar()
     amount_var = tk.StringVar()
@@ -1684,48 +1835,53 @@ def expenses_screen(day, year, month):
     # Store the current date
     current_date_str = f"{year}-{month:02d}-{day:02d}"
 
-    # Main container with scrolling
-    main_container = create_scrollable_frame(exp, MODERN_COLORS['light'])
-    main_container.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+    # Main container with responsive scrolling
+    main_container = create_scrollable_frame(exp, MODERN_COLORS['background'])
+    main_container.pack(fill=tk.BOTH, expand=True, 
+                       padx=responsive_config.padding_medium, 
+                       pady=responsive_config.padding_medium)
     
     # Get the scrollable frame for adding widgets
     scrollable_content = main_container.scrollable_frame
 
     # Header section
-    header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
-    header_frame.pack(fill=tk.X, pady=(0, 30))
+    header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
+    header_frame.pack(fill=tk.X, pady=(0, responsive_config.padding_medium))
 
     # Title
     title_label = tk.Label(header_frame, text="Expense Tracking", 
                           font=MODERN_FONTS['heading'], 
-                          bg=MODERN_COLORS['light'], 
-                          fg=MODERN_COLORS['dark'])
-    title_label.pack(pady=(0, 10))
+                          bg=MODERN_COLORS['background'], 
+                          fg=MODERN_COLORS['text_primary'])
+    title_label.pack(pady=(0, responsive_config.padding_small))
 
     # Date display
     date_label = tk.Label(header_frame, text=f"{year}-{month:02d}-{day:02d}",
                          font=MODERN_FONTS['body'], 
-                         bg=MODERN_COLORS['light'], 
-                         fg=MODERN_COLORS['dark'])
+                         bg=MODERN_COLORS['background'], 
+                         fg=MODERN_COLORS['text_primary'])
     date_label.pack()
 
     # Helper to show Add Expense popup with category dropdown + 'Other' option
     def add_option():
         popup = tk.Toplevel(exp)
         popup.title("Add New Expense")
-        popup.geometry("450x400")
         popup.configure(bg=MODERN_COLORS['light'])
         popup.resizable(False, False)
 
-        # Center the popup
+        # Center the popup with responsive sizing
+        popup_width = max(int(450 * responsive_config.scale_factor), 350)
+        popup_height = max(int(400 * responsive_config.scale_factor), 300)
         popup.update_idletasks()
-        x = (popup.winfo_screenwidth() // 2) - (450 // 2)
-        y = (popup.winfo_screenheight() // 2) - (400 // 2)
-        popup.geometry(f"450x400+{x}+{y}")
+        x = (popup.winfo_screenwidth() // 2) - (popup_width // 2)
+        y = (popup.winfo_screenheight() // 2) - (popup_height // 2)
+        popup.geometry(f"{popup_width}x{popup_height}+{x}+{y}")
 
         # Main container
         popup_container = create_modern_frame(popup, MODERN_COLORS['light'])
-        popup_container.pack(fill=tk.BOTH, expand=True, padx=30, pady=30)
+        popup_container.pack(fill=tk.BOTH, expand=True, 
+                            padx=responsive_config.padding_medium, 
+                            pady=responsive_config.padding_medium)
 
         # Title
         title_label = tk.Label(popup_container, text="Add New Expense", 
@@ -1800,38 +1956,38 @@ def expenses_screen(day, year, month):
         save_btn.pack(pady=10)
 
     # Display section
-    display_frame = create_modern_frame(scrollable_content, MODERN_COLORS['white'])
+    display_frame = create_modern_frame(scrollable_content, MODERN_COLORS['card'])
     display_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 20))
     display_frame.configure(relief='solid', bd=1)
 
     # Header for the list
-    list_header = create_modern_frame(display_frame, MODERN_COLORS['light'])
+    list_header = create_modern_frame(display_frame, MODERN_COLORS['card'])
     list_header.pack(fill=tk.X, padx=10, pady=10)
 
     tk.Label(list_header, text="Expense Category", 
             font=MODERN_FONTS['body'], 
-            bg=MODERN_COLORS['light'], 
-            fg=MODERN_COLORS['dark']).pack(side=tk.LEFT, padx=10)
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(side=tk.LEFT, padx=10)
     
     tk.Label(list_header, text="Amount", 
             font=MODERN_FONTS['body'], 
-            bg=MODERN_COLORS['light'], 
-            fg=MODERN_COLORS['dark']).pack(side=tk.RIGHT, padx=10)
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(side=tk.RIGHT, padx=10)
     
     # Instruction label
-    instruction_frame = create_modern_frame(display_frame, MODERN_COLORS['light'])
+    instruction_frame = create_modern_frame(display_frame, MODERN_COLORS['card'])
     instruction_frame.pack(fill=tk.X, padx=10, pady=(0, 5))
     
     tk.Label(instruction_frame, text="💡 Double-click an item to edit it", 
             font=('Segoe UI', 10), 
-            bg=MODERN_COLORS['light'], 
-            fg=MODERN_COLORS['dark']).pack()
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack()
 
     # Create a listbox with modern styling and double-click editing
     listbox = tk.Listbox(display_frame, 
                         font=MODERN_FONTS['body'],
                         bg=MODERN_COLORS['white'], 
-                        fg=MODERN_COLORS['dark'],
+                        fg=MODERN_COLORS['text_primary'],
                         selectbackground=MODERN_COLORS['primary'],
                         selectforeground=MODERN_COLORS['white'],
                         relief='flat',
@@ -1939,11 +2095,11 @@ def expenses_screen(day, year, month):
             messagebox.showinfo("Success", "Expense entry deleted successfully!")
 
     # Button section
-    button_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
+    button_frame = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
     button_frame.pack(fill=tk.X, pady=20)
 
     # Action buttons
-    action_frame = create_modern_frame(button_frame, MODERN_COLORS['light'])
+    action_frame = create_modern_frame(button_frame, MODERN_COLORS['background'])
     action_frame.pack()
 
     # Undo button (left side)
@@ -1968,7 +2124,7 @@ def expenses_screen(day, year, month):
     delete_btn.pack(side=tk.LEFT, padx=5)
 
     # Navigation button
-    nav_frame = create_modern_frame(button_frame, MODERN_COLORS['light'])
+    nav_frame = create_modern_frame(button_frame, MODERN_COLORS['background'])
     nav_frame.pack(pady=15)
 
     next_btn = create_modern_button(nav_frame, "View Summary", 
@@ -2012,117 +2168,131 @@ def total_screen(day, year, month):
     
     total = tk.Tk()
     total.title("Financial Summary - Money Rider")
-    total.geometry("450x800")  # Mobile aspect ratio
-    total.configure(bg=MODERN_COLORS['light'])
+    total.configure(bg=MODERN_COLORS['background'])
     total.resizable(False, False)
 
-    # Center the window
-    total.update_idletasks()
-    x = (total.winfo_screenwidth() // 2) - (450 // 2)
-    y = (total.winfo_screenheight() // 2) - (800 // 2)
-    total.geometry(f"450x800+{x}+{y}")
+    # Center the window with responsive sizing
+    center_window(total)
 
-    # Main container with mobile padding and scrolling
-    main_container = create_scrollable_frame(total, MODERN_COLORS['light'])
-    main_container.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+    # Main container with responsive padding and scrolling
+    main_container = create_scrollable_frame(total, MODERN_COLORS['background'])
+    main_container.pack(fill=tk.BOTH, expand=True, 
+                       padx=responsive_config.padding_medium, 
+                       pady=responsive_config.padding_medium)
     
     # Get the scrollable frame for adding widgets
     scrollable_content = main_container.scrollable_frame
 
     # Header section
-    header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
-    header_frame.pack(pady=(0, 20))
+    header_frame = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
+    header_frame.pack(pady=(0, responsive_config.padding_large))
 
-    # Title - mobile style
+    # Title - responsive styling
     title_label = tk.Label(header_frame, text="Financial Summary", 
-                          font=('Segoe UI', 28, 'bold'), 
-                          bg=MODERN_COLORS['light'], 
-                          fg=MODERN_COLORS['dark'])
-    title_label.pack(pady=(0, 10))
+                          font=MODERN_FONTS['title'], 
+                          bg=MODERN_COLORS['background'], 
+                          fg=MODERN_COLORS['text_primary'])
+    title_label.pack(pady=(0, responsive_config.padding_small))
 
-    # Date display - mobile style
+    # Date display - responsive styling
     date_str = f"{year}-{month:02d}-{day:02d}"
     date_label = tk.Label(header_frame, text=f"{date_str}", 
-                         font=('Segoe UI', 16), 
-                         bg=MODERN_COLORS['light'], 
-                         fg=MODERN_COLORS['dark'])
-    date_label.pack(pady=5)
+                         font=MODERN_FONTS['subheading'], 
+                         bg=MODERN_COLORS['background'], 
+                         fg=MODERN_COLORS['text_primary'])
+    date_label.pack(pady=responsive_config.padding_tiny)
 
-    # Summary container - mobile card style
-    summary_container = create_modern_frame(scrollable_content, MODERN_COLORS['white'])
-    summary_container.pack(fill=tk.X, pady=20)
+    # Summary container - responsive card style
+    summary_container = create_modern_frame(scrollable_content, MODERN_COLORS['card'])
+    summary_container.pack(fill=tk.X, pady=responsive_config.padding_large)
     summary_container.configure(relief='solid', bd=2)
 
-    # Income section - mobile style
-    income_frame = create_modern_frame(summary_container, MODERN_COLORS['white'])
-    income_frame.pack(fill=tk.X, padx=25, pady=20)
+    # Income section - responsive styling
+    income_frame = create_modern_frame(summary_container, MODERN_COLORS['card'])
+    income_frame.pack(fill=tk.X, 
+                     padx=responsive_config.padding_medium, 
+                     pady=responsive_config.padding_large)
 
     total_income = sum(float(i[1]) for i in current_entries) if current_entries else 0.0
+    income_font_size = max(int(18 * responsive_config.scale_factor), 14)
     tk.Label(income_frame, text="Total Income:", 
-            font=('Segoe UI', 18, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(side=tk.LEFT)
+            font=('Segoe UI', income_font_size, 'bold'), 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(side=tk.LEFT)
     tk.Label(income_frame, text=f"₱{total_income:,.2f}", 
-            font=('Segoe UI', 18, 'bold'), 
-            bg=MODERN_COLORS['white'], 
+            font=('Segoe UI', income_font_size, 'bold'), 
+            bg=MODERN_COLORS['card'], 
             fg=MODERN_COLORS['success']).pack(side=tk.RIGHT)
 
-    # Expenses section - mobile style
-    expenses_frame = create_modern_frame(summary_container, MODERN_COLORS['white'])
-    expenses_frame.pack(fill=tk.X, padx=25, pady=20)
+    # Expenses section - responsive styling
+    expenses_frame = create_modern_frame(summary_container, MODERN_COLORS['card'])
+    expenses_frame.pack(fill=tk.X, 
+                       padx=responsive_config.padding_medium, 
+                       pady=responsive_config.padding_large)
 
     total_expenses = sum(float(e[1]) for e in current_expenses) if current_expenses else 0.0
     tk.Label(expenses_frame, text="Total Expenses:", 
-            font=('Segoe UI', 18, 'bold'), 
-            bg=MODERN_COLORS['white'], 
-            fg=MODERN_COLORS['dark']).pack(side=tk.LEFT)
+            font=('Segoe UI', income_font_size, 'bold'), 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(side=tk.LEFT)
     tk.Label(expenses_frame, text=f"₱{total_expenses:,.2f}", 
-            font=('Segoe UI', 18, 'bold'), 
-            bg=MODERN_COLORS['white'], 
+            font=('Segoe UI', income_font_size, 'bold'), 
+            bg=MODERN_COLORS['card'], 
             fg=MODERN_COLORS['danger']).pack(side=tk.RIGHT)
 
-    # Net total section - mobile style
-    net_frame = create_modern_frame(summary_container, MODERN_COLORS['light'])
-    net_frame.pack(fill=tk.X, padx=25, pady=25)
+    # Net total section - responsive styling
+    net_frame = create_modern_frame(summary_container, MODERN_COLORS['card'])
+    net_frame.pack(fill=tk.X, 
+                  padx=responsive_config.padding_medium, 
+                  pady=responsive_config.padding_medium)
     net_frame.configure(relief='solid', bd=3)
 
     day_total = total_income - total_expenses
+    net_font_size = max(int(20 * responsive_config.scale_factor), 16)
+    net_padding = max(int(20 * responsive_config.scale_factor), 15)
     tk.Label(net_frame, text="Net Total:", 
-            font=('Segoe UI', 20, 'bold'), 
-            bg=MODERN_COLORS['light'], 
-            fg=MODERN_COLORS['dark']).pack(side=tk.LEFT, padx=20, pady=15)
+            font=('Segoe UI', net_font_size, 'bold'), 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['text_primary']).pack(side=tk.LEFT, 
+                                                   padx=net_padding, 
+                                                   pady=responsive_config.padding_medium)
     tk.Label(net_frame, text=f"₱{day_total:,.2f}", 
-            font=('Segoe UI', 20, 'bold'), 
-            bg=MODERN_COLORS['light'], 
-            fg=MODERN_COLORS['success'] if day_total >= 0 else MODERN_COLORS['danger']).pack(side=tk.RIGHT, padx=20, pady=15)
+            font=('Segoe UI', net_font_size, 'bold'), 
+            bg=MODERN_COLORS['card'], 
+            fg=MODERN_COLORS['success'] if day_total >= 0 else MODERN_COLORS['danger']).pack(side=tk.RIGHT, 
+                                                                                            padx=net_padding, 
+                                                                                            pady=responsive_config.padding_medium)
 
-    # Navigation buttons - mobile style
-    button_frame = create_modern_frame(scrollable_content, MODERN_COLORS['light'])
-    button_frame.pack(pady=30)
+    # Navigation buttons - responsive styling
+    button_frame = create_modern_frame(scrollable_content, MODERN_COLORS['background'])
+    button_frame.pack(pady=responsive_config.padding_medium)
 
-    # Undo button - mobile style
+    # Undo button - responsive sizing
+    responsive_button_width = max(int(15 * responsive_config.scale_factor), 12)
     undo_btn = create_undo_button(button_frame, 
                                  command=lambda: [total.destroy(), navigate_back()],
-                                 style='warning', width=15)
-    undo_btn.pack(pady=10)
+                                 style='warning', width=responsive_button_width)
+    undo_btn.pack(pady=responsive_config.padding_small)
 
-    # Back to expenses button - mobile style
+    # Back to expenses button - responsive sizing
+    responsive_button_width_medium = max(int(20 * responsive_config.scale_factor), 15)
     back_btn = create_modern_button(button_frame, "💸 Back to Expenses", 
                                   command=lambda:[total.destroy(), expenses_screen(day, year, month)],
-                                  style='secondary', width=20)
-    back_btn.pack(pady=10)
+                                  style='secondary', width=responsive_button_width_medium)
+    back_btn.pack(pady=responsive_config.padding_small)
 
-    # Finish button - mobile style
+    # Finish button - responsive sizing
+    responsive_button_width_large = max(int(25 * responsive_config.scale_factor), 20)
     finish_btn = create_modern_button(button_frame, "✅ Finish & Return to Calendar", 
                                     command=lambda:[total.destroy(), calendar_screen()],
-                                    style='primary', width=25)
-    finish_btn.pack(pady=10)
+                                    style='primary', width=responsive_button_width_large)
+    finish_btn.pack(pady=responsive_config.padding_small)
 
-    # Sign out button - mobile style
+    # Sign out button - responsive sizing
     signout_btn = create_modern_button(button_frame, "🚪 Sign Out", 
                                       command=lambda:[total.destroy(), login_screen()],
-                                      style='danger', width=20)
-    signout_btn.pack(pady=5)
+                                      style='danger', width=responsive_button_width_medium)
+    signout_btn.pack(pady=responsive_config.padding_tiny)
 
     # Add global undo shortcut
     add_global_undo_shortcut(total)
